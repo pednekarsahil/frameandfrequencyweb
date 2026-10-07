@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame & Frequency | Video Editing · Audio Mixing & Mastering</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Black&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Archivo', 'Helvetica', 'Arial', 'sans-serif'],
+                        'black': ['Archivo Black', 'Helvetica', 'sans-serif'],
+                        'mono': ['Roboto Mono', 'monospace'],
+                    },
+                    colors: {
+                        'paper': '#F4F4F0',
+                        'ink': '#0A0A0A',
+                        'red': '#E7000B',
+                        'grey': '#6B6B6B',
+                        'line': '#D4D4CE',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            -webkit-font-smoothing: antialiased;
+            border-radius: 0 !important;
+        }
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+        }
+        body {
+            overflow-x: hidden;
+        }
+        .grid-lines {
+            background-image:
+                linear-gradient(to right, rgba(10,10,10,0.06) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(10,10,10,0.06) 1px, transparent 1px);
+            background-size: 100px 100px;
+        }
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+        .red-bar { background: #E7000B; }
+
+        /* ---------- MARQUEE ---------- */
+        .marquee-track {
+            animation: marquee 40s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        /* pause marquee on hover */
+        .marquee-wrap:hover .marquee-track {
+            animation-play-state: paused;
+        }
+
+        /* ---------- INDEX CARDS ---------- */
+        .index-card {
+            border: 1px solid #0A0A0A;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .index-card:hover {
+            background: #0A0A0A;
+            color: #F4F4F0;
+            transform: translateY(-4px);
+        }
+        .index-card:hover .red-dot {
+            background: #F4F4F0;
+        }
+        .index-card .red-dot {
+            transition: background 0.3s ease;
+        }
+
+        /* ---------- SWISS UNDERLINE ---------- */
+        .swiss-underline {
+            position: relative;
+        }
+        .swiss-underline::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #0A0A0A;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .swiss-underline:hover::after,
+        .swiss-underline.always-on::after {
+            transform: scaleX(1);
+        }
+
+        /* ---------- STRIKETHROUGH ---------- */
+        .strike-through {
+            position: relative;
+        }
+        .strike-through::before {
+            content: '';
+            position: absolute;
+            left: -5%;
+            right: -5%;
+            top: 50%;
+            height: 4px;
+            background: #E7000B;
+            transform: rotate(-2deg) scaleX(0);
+            transform-origin: left;
+            animation: strikeIn 1s ease-out 0.8s forwards;
+        }
+        @keyframes strikeIn {
+            to { transform: rotate(-2deg) scaleX(1); }
+        }
+
+        /* ---------- SCROLL REVEAL ---------- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform;
+        }
+        .reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-40px);
+            transition: opacity 0.9s ease, transform 0.9s ease;
+        }
+        .reveal-left.is-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(40px);
+            transition: opacity 0.9s ease, transform 0.9s ease;
+        }
+        .reveal-right.is-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        /* stagger helper */
+        .reveal-delay-1 { transition-delay: 0.08s; }
+        .reveal-delay-2 { transition-delay: 0.16s; }
+        .reveal-delay-3 { transition-delay: 0.24s; }
+        .reveal-delay-4 { transition-delay: 0.32s; }
+        .reveal-delay-5 { transition-delay: 0.40s; }
+
+        /* ---------- HERO ENTRANCE ---------- */
+        .hero-line {
+            opacity: 0;
+            transform: translateY(60px);
+            animation: heroIn 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .hero-line-1 { animation-delay: 0.1s; }
+        .hero-line-2 { animation-delay: 0.25s; }
+        .hero-line-3 { animation-delay: 0.4s; }
+        .hero-line-4 { animation-delay: 0.55s; }
+        @keyframes heroIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hero-fade {
+            opacity: 0;
+            animation: fadeUp 0.9s ease-out 0.7s forwards;
+        }
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---------- FLOATING PULSE ICON ---------- */
+        .float-pulse {
+            animation: floatPulse 4s ease-in-out infinite;
+        }
+        @keyframes floatPulse {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; }
+            50% { transform: translateY(-10px) scale(1.06); opacity: 1; }
+        }
+
+        /* ---------- SCROLL TICK ---------- */
+        .scroll-tick {
+            animation: tick 2s ease-in-out infinite;
+        }
+        @keyframes tick {
+            0%, 100% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(8px); opacity: 0.3; }
+        }
+
+        /* ---------- RED DOT PULSE (live status) ---------- */
+        .pulse-dot {
+            animation: pulseDot 1.8s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(231, 0, 11, 0.6); }
+            50% { box-shadow: 0 0 0 6px rgba(231, 0, 11, 0); }
+        }
+
+        /* ---------- BUTTON HOVER ---------- */
+        .btn-slide {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .btn-slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: #E7000B;
+            transform: translateX(-100%);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: -1;
+        }
+        .btn-slide:hover::before {
+            transform: translateX(0);
+        }
+
+        /* ---------- HIDE SCROLLBAR ---------- */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* ---------- FOCUS VISIBLE ---------- */
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible {
+            outline: 3px solid #E7000B;
+            outline-offset: 2px;
+        }
+
+        /* ---------- REDUCED MOTION ---------- */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+                scroll-behavior: auto !important;
+            }
+            .reveal, .reveal-left, .reveal-right {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .hero-line, .hero-fade {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* ---------- RESPONSIVE TWEAKS ---------- */
+        @media (max-width: 640px) {
+            .grid-lines { background-size: 60px 60px; }
+        }
+    </style>
+</head>
+<body class="bg-paper text-ink font-sans antialiased overflow-x-hidden selection:bg-red selection:text-paper">
+
+    <!-- ==================== TOP BAR (utility strip) ==================== -->
+    <div class="border-b border-ink bg-ink text-paper">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 h-9 font-mono text-[10px] tracking-widest uppercase overflow-hidden">
+            <div class="flex items-center gap-6 shrink-0">
+                <span class="hidden sm:inline">EST. 2016 · MUMBAI, INDIA</span>
+                <span class="hidden md:inline">STUDIO-GRADE POST</span>
+            </div>
+            <div class="flex items-center gap-3 sm:gap-6 truncate">
+                <a href="mailto:studio@frameandfrequency.com" class="hover:text-red transition-colors truncate">studio@frameandfrequency.com</a>
+                <span class="text-grey hidden sm:inline">/</span>
+                <a href="tel:+912224080955" class="hover:text-red transition-colors hidden sm:inline">+91 22 2408 0955</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== NAVIGATION (grid header) ==================== -->
+    <nav class="border-b-2 border-ink bg-paper sticky top-0 z-50">
+        <div class="max-w-[1600px] mx-auto">
+            <div class="grid grid-cols-12 items-stretch">
+                <!-- Logo cell -->
+                <div class="col-span-12 md:col-span-3 lg:col-span-4 border-b-2 md:border-b-0 md:border-r-2 border-ink flex items-center px-4 sm:px-6 py-4 md:py-5">
+                    <a href="#home" class="flex items-center gap-3 group">
+                        <div class="w-9 h-9 bg-red flex items-center justify-center transition-transform duration-300 group-hover:rotate-6">
+                            <span class="font-black text-paper text-lg leading-none">F</span>
+                        </div>
+                        <div class="leading-none">
+                            <div class="font-black text-xl md:text-2xl tracking-tighter">FRAME <span class="text-red">&</span> FREQ</div>
+                            <div class="font-mono text-[9px] tracking-[0.3em] uppercase mt-0.5">Video · Audio Post</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Nav links -->
+                <div class="hidden md:flex col-span-6 lg:col-span-5 border-r-2 border-ink">
+                    <a href="#work" class="flex-1 border-r border-ink px-4 py-5 flex items-center justify-center font-medium text-sm uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors">
+                        01 / Work
+                    </a>
+                    <a href="#capabilities" class="flex-1 border-r border-ink px-4 py-5 flex items-center justify-center font-medium text-sm uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors">
+                        02 / Services
+                    </a>
+                    <a href="#about" class="flex-1 border-r border-ink px-4 py-5 flex items-center justify-center font-medium text-sm uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors">
+                        03 / About
+                    </a>
+                    <a href="#contact" class="flex-1 px-4 py-5 flex items-center justify-center font-medium text-sm uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors">
+                        04 / Contact
+                    </a>
+                </div>
+
+                <!-- CTA -->
+                <div class="hidden lg:flex col-span-3 items-center justify-center px-4 py-3">
+                    <a href="#contact" class="btn-slide w-full bg-ink text-paper py-3 px-6 font-black text-sm tracking-widest uppercase text-center transition-colors">
+                        Start a Project →
+                    </a>
+                </div>
+
+                <!-- Mobile toggle -->
+                <button id="menuBtn" class="md:hidden col-span-12 border-t-2 border-ink py-4 flex items-center justify-center gap-3 hover:bg-ink hover:text-paper transition-colors">
+                    <span class="font-mono text-xs tracking-widest uppercase">Menu</span>
+                    <i class="fa-solid fa-bars" id="menuIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden md:hidden border-t-2 border-ink bg-paper">
+            <a href="#work" class="mobile-link block border-b border-ink px-6 py-5 font-black text-2xl tracking-tight hover:bg-ink hover:text-paper transition-colors">
+                01 / WORK
+            </a>
+            <a href="#capabilities" class="mobile-link block border-b border-ink px-6 py-5 font-black text-2xl tracking-tight hover:bg-ink hover:text-paper transition-colors">
+                02 / SERVICES
+            </a>
+            <a href="#about" class="mobile-link block border-b border-ink px-6 py-5 font-black text-2xl tracking-tight hover:bg-ink hover:text-paper transition-colors">
+                03 / ABOUT
+            </a>
+            <a href="#contact" class="mobile-link block px-6 py-5 font-black text-2xl tracking-tight bg-red text-paper">
+                04 / CONTACT
+            </a>
+        </div>
+    </nav>
+
+    <!-- ==================== HERO (typographic brutalist) ==================== -->
+    <section id="home" class="border-b-2 border-ink relative">
+        <div class="max-w-[1600px] mx-auto">
+
+            <!-- Label strip -->
+            <div class="grid grid-cols-12 border-b border-ink">
+                <div class="col-span-6 sm:col-span-4 md:col-span-3 border-r border-ink px-4 sm:px-6 py-3 font-mono text-[10px] tracking-widest uppercase">
+                    Reel No. 001/2016
+                </div>
+                <div class="hidden sm:block col-span-4 md:col-span-3 border-r border-ink px-4 sm:px-6 py-3 font-mono text-[10px] tracking-widest uppercase">
+                    Classification: Post-Production
+                </div>
+                <div class="hidden md:block col-span-3 border-r border-ink px-4 sm:px-6 py-3 font-mono text-[10px] tracking-widest uppercase">
+                    Ref: Video + Audio
+                </div>
+                <div class="col-span-6 sm:col-span-4 md:col-span-3 px-4 sm:px-6 py-3 font-mono text-[10px] tracking-widest uppercase flex items-center gap-2">
+                    <span class="w-2 h-2 bg-red pulse-dot"></span>
+                    <span>Studio Online</span>
+                </div>
+            </div>
+
+            <!-- Main hero content -->
+            <div class="grid grid-cols-12">
+                <!-- Left: vertical text rail -->
+                <div class="hidden lg:flex col-span-1 border-r-2 border-ink py-8 flex-col justify-between items-center">
+                    <span class="vertical-text font-mono text-[10px] tracking-[0.4em] uppercase">Frame &amp; Frequency · 2016 – 2024</span>
+                    <div class="vertical-text font-black text-sm tracking-widest">— — —</div>
+                    <div class="w-2 h-2 bg-red pulse-dot"></div>
+                </div>
+
+                <!-- Center: massive type -->
+                <div class="col-span-12 lg:col-span-8 border-r-2 border-ink p-6 sm:p-10 lg:p-16 grid-lines">
+                    <div class="font-mono text-[11px] tracking-[0.3em] uppercase mb-8 flex items-center gap-3 hero-fade">
+                        <span class="w-8 h-[2px] bg-ink"></span>
+                        <span>A post-production studio</span>
+                    </div>
+
+                    <h1 class="font-black text-[15vw] sm:text-[11vw] lg:text-[8.5vw] leading-[0.85] tracking-[-0.05em] uppercase">
+                        <span class="block hero-line hero-line-1">FRAME</span>
+                        <span class="flex items-center gap-4 flex-wrap hero-line hero-line-2">
+                            <span class="strike-through">&amp;</span>
+                            <span class="text-red">/</span>
+                            <span>FREQ</span>
+                        </span>
+                        <span class="block text-red hero-line hero-line-3">UENCY</span>
+                        <span class="block text-grey hero-line hero-line-4">STUDIO</span>
+                    </h1>
+
+                    <div class="grid sm:grid-cols-2 gap-8 mt-12 max-w-4xl reveal">
+                        <div>
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-2">Abstract</div>
+                            <p class="text-base leading-relaxed">
+                                Cinematic video editing, colour grading, and precision audio mixing &amp; mastering. Built for creators, brands, and filmmakers who care about how it looks and how it sounds.
+                            </p>
+                        </div>
+                        <div>
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-2">Scope</div>
+                            <ul class="font-mono text-sm space-y-1">
+                                <li>▸ Narrative &amp; commercial edit</li>
+                                <li>▸ Colour grading &amp; finishing</li>
+                                <li>▸ Audio mixing &amp; mastering</li>
+                                <li>▸ Sound design &amp; restoration</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-4 sm:gap-6 mt-12 reveal">
+                        <a href="#work" class="group inline-flex items-center gap-4 bg-ink text-paper px-6 sm:px-8 py-4 sm:py-5 font-black text-sm tracking-widest uppercase btn-slide transition-colors">
+                            View the reel
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
+                        </a>
+                        <a href="#contact" class="font-mono text-xs tracking-widest uppercase border-b-2 border-ink pb-1 hover:border-red hover:text-red transition-colors">
+                            → Book a session
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right: numeric spec block -->
+                <div class="col-span-12 lg:col-span-3 flex flex-col">
+                    <div class="border-b border-ink p-4 sm:p-6">
+                        <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-1">Timeline</div>
+                        <div class="font-black text-3xl tracking-tighter" data-counter="4" data-suffix="K / 60">0K / 60</div>
+                        <div class="font-mono text-[10px] tracking-widest uppercase text-grey mt-1">Native resolution</div>
+                    </div>
+                    <div class="border-b border-ink p-4 sm:p-6">
+                        <div class="font-black text-3xl tracking-tighter" data-counter="96" data-suffix=" kHz">0 kHz</div>
+                        <div class="font-mono text-[10px] tracking-widest uppercase text-grey mt-1">Audio sample rate</div>
+                    </div>
+                    <div class="border-b border-ink p-4 sm:p-6">
+                        <div class="font-black text-3xl tracking-tighter"><span data-counter="8">0</span><span class="text-red">+</span></div>
+                        <div class="font-mono text-[10px] tracking-widest uppercase text-grey mt-1">Years in post</div>
+                    </div>
+                    <div class="border-b border-ink p-4 sm:p-6">
+                        <div class="font-black text-3xl tracking-tighter"><span data-counter="300">0</span><span class="text-red">+</span></div>
+                        <div class="font-mono text-[10px] tracking-widest uppercase text-grey mt-1">Projects delivered</div>
+                    </div>
+                    <!-- bottom: decorative grid -->
+                    <div class="flex-1 min-h-[120px] grid-lines flex items-center justify-center p-4 relative">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fa-solid fa-wave-square text-red text-6xl float-pulse"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== MARQUEE STRIP (inverted) ==================== -->
+    <div class="marquee-wrap bg-red text-paper py-4 overflow-hidden border-b-2 border-ink">
+        <div class="flex marquee-track whitespace-nowrap">
+            <div class="flex items-center gap-12 pr-12 font-black text-xl sm:text-2xl uppercase tracking-tighter">
+                <span>◆ Video Editing</span>
+                <span>◆ Colour Grading</span>
+                <span>◆ Audio Mixing</span>
+                <span>◆ Mastering</span>
+                <span>◆ Sound Design</span>
+                <span>◆ Dialogue Cleanup</span>
+            </div>
+            <div class="flex items-center gap-12 pr-12 font-black text-xl sm:text-2xl uppercase tracking-tighter" aria-hidden="true">
+                <span>◆ Video Editing</span>
+                <span>◆ Colour Grading</span>
+                <span>◆ Audio Mixing</span>
+                <span>◆ Mastering</span>
+                <span>◆ Sound Design</span>
+                <span>◆ Dialogue Cleanup</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== WORK / CAPABILITIES (index cards) ==================== -->
+    <section id="work" class="border-b-2 border-ink">
+        <div class="max-w-[1600px] mx-auto">
+
+            <!-- section header -->
+            <div class="grid grid-cols-12 border-b-2 border-ink">
+                <div class="col-span-12 md:col-span-3 border-b-2 md:border-b-0 md:border-r-2 border-ink p-6 lg:p-10 flex flex-col justify-between reveal">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-grey">Section</div>
+                    <div class="font-black text-[15vw] md:text-[7vw] leading-none tracking-tighter mt-4 md:mt-0">
+                        01
+                    </div>
+                </div>
+                <div class="col-span-12 md:col-span-9 p-6 lg:p-14 reveal">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-4">Index of services</div>
+                    <h2 class="font-black text-4xl sm:text-5xl lg:text-7xl leading-[0.9] tracking-tighter uppercase max-w-4xl">
+                        Three crafts.<br>
+                        <span class="text-red">One obsession</span> with detail.
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Index cards grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3">
+
+                <!-- Card 1 -->
+                <article class="index-card reveal reveal-delay-1 border-t-0 md:border-t-0 md:border-r-2 md:border-r-ink p-8 lg:p-12 flex flex-col justify-between group cursor-pointer">
+                    <div>
+                        <div class="flex justify-between items-start mb-12">
+                            <div class="w-3 h-3 bg-red red-dot"></div>
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey group-hover:text-paper/60">Fig. 1.1</div>
+                        </div>
+                        <div class="font-black text-7xl lg:text-8xl leading-none tracking-tighter mb-6">01</div>
+                        <h3 class="font-black text-2xl lg:text-3xl uppercase tracking-tight mb-4">
+                            Video Editing
+                        </h3>
+                        <p class="text-sm leading-relaxed opacity-80 mb-8">
+                            Story-first editing for film, commercials, and content. Tight pacing, invisible cuts, and colour that carries the mood.
+                        </p>
+                        <ul class="font-mono text-[11px] tracking-wider uppercase space-y-1.5 opacity-70">
+                            <li>— Narrative &amp; commercial</li>
+                            <li>— Colour grading</li>
+                            <li>— Motion graphics</li>
+                            <li>— Finishing &amp; delivery</li>
+                        </ul>
+                    </div>
+                    <div class="mt-12 pt-6 border-t border-current flex items-center justify-between">
+                        <span class="font-mono text-[10px] tracking-widest uppercase">See the reel</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </article>
+
+                <!-- Card 2 -->
+                <article class="index-card reveal reveal-delay-2 border-t-2 md:border-t-0 md:border-r-2 md:border-r-ink p-8 lg:p-12 flex flex-col justify-between group cursor-pointer">
+                    <div>
+                        <div class="flex justify-between items-start mb-12">
+                            <div class="w-3 h-3 bg-red red-dot"></div>
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey group-hover:text-paper/60">Fig. 1.2</div>
+                        </div>
+                        <div class="font-black text-7xl lg:text-8xl leading-none tracking-tighter mb-6">02</div>
+                        <h3 class="font-black text-2xl lg:text-3xl uppercase tracking-tight mb-4">
+                            Audio Mixing
+                        </h3>
+                        <p class="text-sm leading-relaxed opacity-80 mb-8">
+                            Balance, clarity, and depth. Dialogue that cuts through, music that breathes, and mixes that translate on every speaker.
+                        </p>
+                        <ul class="font-mono text-[11px] tracking-wider uppercase space-y-1.5 opacity-70">
+                            <li>— Dialogue editing</li>
+                            <li>— Stem mixing</li>
+                            <li>— Sound design</li>
+                            <li>— Noise &amp; repair</li>
+                        </ul>
+                    </div>
+                    <div class="mt-12 pt-6 border-t border-current flex items-center justify-between">
+                        <span class="font-mono text-[10px] tracking-widest uppercase">See the reel</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </article>
+
+                <!-- Card 3 -->
+                <article class="index-card reveal reveal-delay-3 border-t-2 md:border-t-0 p-8 lg:p-12 flex flex-col justify-between group cursor-pointer">
+                    <div>
+                        <div class="flex justify-between items-start mb-12">
+                            <div class="w-3 h-3 bg-red red-dot"></div>
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey group-hover:text-paper/60">Fig. 1.3</div>
+                        </div>
+                        <div class="font-black text-7xl lg:text-8xl leading-none tracking-tighter mb-6">03</div>
+                        <h3 class="font-black text-2xl lg:text-3xl uppercase tracking-tight mb-4">
+                            Mastering
+                        </h3>
+                        <p class="text-sm leading-relaxed opacity-80 mb-8">
+                            Final-stage polish for music, podcasts, and film. Competitive loudness, pristine tone, and streaming-ready delivery.
+                        </p>
+                        <ul class="font-mono text-[11px] tracking-wider uppercase space-y-1.5 opacity-70">
+                            <li>— Stereo &amp; stem master</li>
+                            <li>— Loudness (LUFS)</li>
+                            <li>— Streaming delivery</li>
+                            <li>— Vinyl / DDP</li>
+                        </ul>
+                    </div>
+                    <div class="mt-12 pt-6 border-t border-current flex items-center justify-between">
+                        <span class="font-mono text-[10px] tracking-widest uppercase">See the reel</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== ABOUT (editorial spread with grid) ==================== -->
+    <section id="about" class="border-b-2 border-ink">
+        <div class="max-w-[1600px] mx-auto">
+
+            <!-- section header -->
+            <div class="grid grid-cols-12 border-b-2 border-ink">
+                <div class="col-span-12 md:col-span-3 border-b-2 md:border-b-0 md:border-r-2 border-ink p-6 lg:p-10 flex flex-col justify-between reveal">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-grey">Section</div>
+                    <div class="font-black text-[15vw] md:text-[7vw] leading-none tracking-tighter mt-4 md:mt-0">
+                        02
+                    </div>
+                </div>
+                <div class="col-span-12 md:col-span-9 p-6 lg:p-14 reveal">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-4">Studio profile</div>
+                    <h2 class="font-black text-4xl sm:text-5xl lg:text-7xl leading-[0.9] tracking-tighter uppercase max-w-4xl">
+                        Every frame.<br>
+                        <span class="text-red">Every frequency.</span>
+                    </h2>
+                </div>
+            </div>
+
+            <!-- body -->
+            <div class="grid grid-cols-12">
+
+                <!-- big stat panel -->
+                <div class="col-span-12 lg:col-span-5 border-b-2 lg:border-b-0 lg:border-r-2 border-ink p-6 lg:p-12 flex flex-col justify-between min-h-[400px] lg:min-h-[600px] reveal-left">
+                    <div>
+                        <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-3">Founded</div>
+                        <div class="font-black text-[22vw] lg:text-[14vw] leading-[0.8] tracking-tighter text-red">
+                            2016
+                        </div>
+                    </div>
+                    <div class="mt-12 space-y-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-3 h-3 bg-ink mt-2 flex-shrink-0"></div>
+                            <div>
+                                <div class="font-black text-lg uppercase">Mumbai, India</div>
+                                <div class="font-mono text-[11px] tracking-widest uppercase text-grey">Studio &amp; mix room</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-3 h-3 bg-ink mt-2 flex-shrink-0"></div>
+                            <div>
+                                <div class="font-black text-lg uppercase">Remote-First</div>
+                                <div class="font-mono text-[11px] tracking-widest uppercase text-grey">Clients across 6 countries</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- text content -->
+                <div class="col-span-12 lg:col-span-7 p-6 lg:p-14 reveal-right">
+                    <div class="max-w-2xl">
+                        <p class="text-2xl lg:text-3xl leading-[1.3] font-medium mb-10">
+                            <span class="text-red font-black">Frame &amp; Frequency</span> is a post-production studio for video editing and audio mixing &amp; mastering — built for work that needs to look sharp and sound sharp.
+                        </p>
+
+                        <div class="grid sm:grid-cols-2 gap-10 mb-12">
+                            <div>
+                                <div class="swiss-underline always-on inline-block font-black uppercase text-sm tracking-wider mb-4 pb-1">Our Approach</div>
+                                <p class="text-sm leading-relaxed text-grey">
+                                    We start with the story. Every cut, every level, every master is chosen to serve the message — not to show off. Restraint over noise.
+                                </p>
+                            </div>
+                            <div>
+                                <div class="swiss-underline always-on inline-block font-black uppercase text-sm tracking-wider mb-4 pb-1">Our Delivery</div>
+                                <p class="text-sm leading-relaxed text-grey">
+                                    Picture lock, colour, mix, master, delivery — we own the whole chain. Files arrive ready for broadcast, cinema, or streaming.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="border-t-2 border-ink pt-8">
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-6">Selected clients / sectors</div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                <div class="border border-ink p-4 text-center hover:bg-ink hover:text-paper transition-colors group">
+                                    <i class="fa-solid fa-film text-xl mb-2 group-hover:scale-110 transition-transform inline-block"></i>
+                                    <div class="font-mono text-[10px] uppercase tracking-widest">Film</div>
+                                </div>
+                                <div class="border border-ink p-4 text-center hover:bg-ink hover:text-paper transition-colors group">
+                                    <i class="fa-solid fa-music text-xl mb-2 group-hover:scale-110 transition-transform inline-block"></i>
+                                    <div class="font-mono text-[10px] uppercase tracking-widest">Music</div>
+                                </div>
+                                <div class="border border-ink p-4 text-center hover:bg-ink hover:text-paper transition-colors group">
+                                    <i class="fa-solid fa-podcast text-xl mb-2 group-hover:scale-110 transition-transform inline-block"></i>
+                                    <div class="font-mono text-[10px] uppercase tracking-widest">Podcast</div>
+                                </div>
+                                <div class="border border-ink p-4 text-center hover:bg-ink hover:text-paper transition-colors group">
+                                    <i class="fa-solid fa-bullhorn text-xl mb-2 group-hover:scale-110 transition-transform inline-block"></i>
+                                    <div class="font-mono text-[10px] uppercase tracking-widest">Brands</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CAPABILITIES DETAIL / PROCESS ==================== -->
+    <section id="capabilities" class="border-b-2 border-ink bg-ink text-paper">
+        <div class="max-w-[1600px] mx-auto">
+
+            <div class="grid grid-cols-12 border-b-2 border-paper/20">
+                <div class="col-span-12 md:col-span-3 border-b-2 md:border-b-0 md:border-r-2 border-paper/20 p-6 lg:p-10 reveal">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-paper/50">Section</div>
+                    <div class="font-black text-[15vw] md:text-[7vw] leading-none tracking-tighter mt-4 md:mt-0 text-red">
+                        03
+                    </div>
+                </div>
+                <div class="col-span-12 md:col-span-9 p-6 lg:p-14 reveal">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-paper/50 mb-4">Workflow</div>
+                    <h2 class="font-black text-4xl sm:text-5xl lg:text-7xl leading-[0.9] tracking-tighter uppercase max-w-4xl">
+                        From rushes<br>
+                        to <span class="text-red">final master.</span>
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Process steps -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+
+                <div class="reveal reveal-delay-1 border-b-2 sm:border-b-0 sm:border-r-2 lg:border-r-2 border-paper/20 p-8 lg:p-10 hover:bg-red transition-colors duration-300 group">
+                    <div class="font-black text-6xl lg:text-7xl leading-none tracking-tighter mb-6 text-red group-hover:text-paper transition-colors">01</div>
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-paper/50 mb-3 group-hover:text-paper/80">Step One</div>
+                    <h3 class="font-black text-xl uppercase mb-4">Brief &amp; Ingest</h3>
+                    <p class="text-sm leading-relaxed opacity-70">
+                        We review your footage, audio, and references — then agree on scope, format, and delivery specs before a single frame moves.
+                    </p>
+                </div>
+
+                <div class="reveal reveal-delay-2 border-b-2 lg:border-b-0 lg:border-r-2 border-paper/20 p-8 lg:p-10 hover:bg-red transition-colors duration-300 group">
+                    <div class="font-black text-6xl lg:text-7xl leading-none tracking-tighter mb-6 text-red group-hover:text-paper transition-colors">02</div>
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-paper/50 mb-3 group-hover:text-paper/80">Step Two</div>
+                    <h3 class="font-black text-xl uppercase mb-4">Edit &amp; Design</h3>
+                    <p class="text-sm leading-relaxed opacity-70">
+                        Picture cut, sound design, dialogue cleanup, and colour grade — shaped together so vision and audio stay in sync.
+                    </p>
+                </div>
+
+                <div class="reveal reveal-delay-3 border-b-2 sm:border-b-0 sm:border-r-2 lg:border-r-2 border-paper/20 p-8 lg:p-10 hover:bg-red transition-colors duration-300 group">
+                    <div class="font-black text-6xl lg:text-7xl leading-none tracking-tighter mb-6 text-red group-hover:text-paper transition-colors">03</div>
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-paper/50 mb-3 group-hover:text-paper/80">Step Three</div>
+                    <h3 class="font-black text-xl uppercase mb-4">Mix &amp; Master</h3>
+                    <p class="text-sm leading-relaxed opacity-70">
+                        Full mix on calibrated monitors, then mastering to target loudness — podcast, streaming, broadcast, or cinema.
+                    </p>
+                </div>
+
+                <div class="reveal reveal-delay-4 p-8 lg:p-10 hover:bg-red transition-colors duration-300 group">
+                    <div class="font-black text-6xl lg:text-7xl leading-none tracking-tighter mb-6 text-red group-hover:text-paper transition-colors">04</div>
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-paper/50 mb-3 group-hover:text-paper/80">Step Four</div>
+                    <h3 class="font-black text-xl uppercase mb-4">Deliver &amp; Archive</h3>
+                    <p class="text-sm leading-relaxed opacity-70">
+                        Masters, stems, captions, and platform-ready exports delivered. Project files archived for future revisions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CONTACT (split grid) ==================== -->
+    <section id="contact" class="border-b-2 border-ink">
+        <div class="max-w-[1600px] mx-auto">
+
+            <!-- section header -->
+            <div class="grid grid-cols-12 border-b-2 border-ink">
+                <div class="col-span-12 md:col-span-3 border-b-2 md:border-b-0 md:border-r-2 border-ink p-6 lg:p-10 flex flex-col justify-between reveal">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-grey">Section</div>
+                    <div class="font-black text-[15vw] md:text-[7vw] leading-none tracking-tighter mt-4 md:mt-0">
+                        04
+                    </div>
+                </div>
+                <div class="col-span-12 md:col-span-9 p-6 lg:p-14 reveal">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-4">Get in touch</div>
+                    <h2 class="font-black text-4xl sm:text-5xl lg:text-7xl leading-[0.9] tracking-tighter uppercase max-w-4xl">
+                        Tell us what<br>
+                        you're <span class="text-red">making.</span>
+                    </h2>
+                </div>
+            </div>
+
+            <!-- body -->
+            <div class="grid grid-cols-12">
+
+                <!-- left: details -->
+                <div class="col-span-12 lg:col-span-5 border-b-2 lg:border-b-0 lg:border-r-2 border-ink p-6 lg:p-12 reveal-left">
+                    <div class="space-y-10">
+                        <div>
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-3">Studio</div>
+                            <div class="font-black text-xl uppercase mb-2">Mumbai, India</div>
+                            <p class="text-sm leading-relaxed text-grey mb-4">
+                                2, Sion Vijayanand CHS, Plot No.267, Scheme No. 6, Road No. 31, Near Gandhi Market, Sion, Mumbai-400 022
+                            </p>
+                            <div class="font-mono text-sm space-y-1 break-all sm:break-normal">
+                                <div>+91-22-24080955</div>
+                                <div>+91-22-24010226</div>
+                                <div class="text-red">studio@frameandfrequency.com</div>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-ink pt-10">
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-3">Bookings</div>
+                            <div class="font-black text-xl uppercase mb-2">Project Enquiries</div>
+                            <p class="text-sm leading-relaxed text-grey mb-4">
+                                Share your brief, references, and timeline — we'll reply with a quote and a slot.
+                            </p>
+                            <div class="font-mono text-sm space-y-1 break-all sm:break-normal">
+                                <div>+91-22-24300264</div>
+                                <div class="text-red">book@frameandfrequency.com</div>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-ink pt-10">
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-3">New Business</div>
+                            <div class="font-black text-xl uppercase mb-2">Aria Kapoor</div>
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey mb-4">Head of Client Relations</div>
+                            <div class="font-mono text-sm space-y-1 break-all sm:break-normal">
+                                <div>+91 98200 12345</div>
+                                <div class="text-red">aria@frameandfrequency.com</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- right: form -->
+                <div class="col-span-12 lg:col-span-7 p-6 lg:p-12 reveal-right">
+                    <form id="contactForm" class="space-y-8" novalidate>
+                        <div class="grid sm:grid-cols-2 gap-x-8 gap-y-8">
+                            <div>
+                                <label for="cf-name" class="font-mono text-[10px] tracking-widest uppercase text-grey block mb-2">01 / Name *</label>
+                                <input id="cf-name" name="name" type="text" required class="w-full bg-transparent border-b-2 border-ink py-3 text-base sm:text-lg font-medium focus:outline-none focus:border-red transition-colors placeholder-grey/50" placeholder="Your full name">
+                            </div>
+                            <div>
+                                <label for="cf-email" class="font-mono text-[10px] tracking-widest uppercase text-grey block mb-2">02 / Email *</label>
+                                <input id="cf-email" name="email" type="email" required class="w-full bg-transparent border-b-2 border-ink py-3 text-base sm:text-lg font-medium focus:outline-none focus:border-red transition-colors placeholder-grey/50" placeholder="you@studio.com">
+                            </div>
+                            <div>
+                                <label for="cf-company" class="font-mono text-[10px] tracking-widest uppercase text-grey block mb-2">03 / Company</label>
+                                <input id="cf-company" name="company" type="text" class="w-full bg-transparent border-b-2 border-ink py-3 text-base sm:text-lg font-medium focus:outline-none focus:border-red transition-colors placeholder-grey/50" placeholder="Studio or brand">
+                            </div>
+                            <div>
+                                <label for="cf-phone" class="font-mono text-[10px] tracking-widest uppercase text-grey block mb-2">04 / Phone</label>
+                                <input id="cf-phone" name="phone" type="tel" class="w-full bg-transparent border-b-2 border-ink py-3 text-base sm:text-lg font-medium focus:outline-none focus:border-red transition-colors placeholder-grey/50" placeholder="+91 ...">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="font-mono text-[10px] tracking-widest uppercase text-grey block mb-3">05 / Interested in</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <label class="border-2 border-ink p-3 cursor-pointer text-center hover:bg-ink hover:text-paper transition-colors has-[:checked]:bg-red has-[:checked]:text-paper has-[:checked]:border-red">
+                                    <input type="radio" name="interest" value="editing" class="hidden" checked>
+                                    <div class="font-black text-[11px] uppercase tracking-wider">Editing</div>
+                                </label>
+                                <label class="border-2 border-ink p-3 cursor-pointer text-center hover:bg-ink hover:text-paper transition-colors has-[:checked]:bg-red has-[:checked]:text-paper has-[:checked]:border-red">
+                                    <input type="radio" name="interest" value="mixing" class="hidden">
+                                    <div class="font-black text-[11px] uppercase tracking-wider">Mixing</div>
+                                </label>
+                                <label class="border-2 border-ink p-3 cursor-pointer text-center hover:bg-ink hover:text-paper transition-colors has-[:checked]:bg-red has-[:checked]:text-paper has-[:checked]:border-red">
+                                    <input type="radio" name="interest" value="mastering" class="hidden">
+                                    <div class="font-black text-[11px] uppercase tracking-wider">Mastering</div>
+                                </label>
+                                <label class="border-2 border-ink p-3 cursor-pointer text-center hover:bg-ink hover:text-paper transition-colors has-[:checked]:bg-red has-[:checked]:text-paper has-[:checked]:border-red">
+                                    <input type="radio" name="interest" value="full-post" class="hidden">
+                                    <div class="font-black text-[11px] uppercase tracking-wider">Full Post</div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="cf-details" class="font-mono text-[10px] tracking-widest uppercase text-grey block mb-2">06 / Project details *</label>
+                            <textarea id="cf-details" name="details" required rows="4" class="w-full bg-transparent border-b-2 border-ink py-3 text-base sm:text-lg font-medium focus:outline-none focus:border-red transition-colors placeholder-grey/50 resize-none" placeholder="Describe your project — format, length, deadline, references..."></textarea>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-4 sm:gap-6 pt-4">
+                            <button type="submit" class="group inline-flex items-center gap-4 bg-ink text-paper px-6 sm:px-8 py-4 sm:py-5 font-black text-sm tracking-widest uppercase btn-slide transition-colors">
+                                Send enquiry
+                                <i class="fa-solid fa-arrow-right group-hover:translate-x-2 transition-transform"></i>
+                            </button>
+                            <div class="font-mono text-[10px] tracking-widest uppercase text-grey">
+                                — Response within 24 hours
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-ink text-paper">
+        <div class="max-w-[1600px] mx-auto">
+
+            <!-- Big brand line -->
+            <div class="border-b-2 border-paper/20 p-6 lg:p-10 overflow-hidden">
+                <div class="font-black text-[22vw] sm:text-[20vw] lg:text-[14vw] leading-[0.8] tracking-tighter uppercase reveal">
+                    F<span class="text-red">&amp;</span>F<span class="text-red">.</span>
+                </div>
+            </div>
+
+            <!-- Grid of links -->
+            <div class="grid grid-cols-12 border-b-2 border-paper/20">
+                <div class="col-span-6 md:col-span-3 border-b-2 md:border-b-0 border-r-2 md:border-r-2 border-paper/20 p-6 lg:p-10">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-paper/50 mb-4">Index</div>
+                    <ul class="space-y-3 font-black text-base sm:text-lg uppercase">
+                        <li><a href="#home" class="hover:text-red transition-colors">Home</a></li>
+                        <li><a href="#work" class="hover:text-red transition-colors">Work</a></li>
+                        <li><a href="#capabilities" class="hover:text-red transition-colors">Services</a></li>
+                        <li><a href="#about" class="hover:text-red transition-colors">About</a></li>
+                        <li><a href="#contact" class="hover:text-red transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-span-6 md:col-span-3 border-b-2 md:border-b-0 md:border-r-2 border-paper/20 p-6 lg:p-10">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-paper/50 mb-4">Services</div>
+                    <ul class="space-y-3 font-black text-base sm:text-lg uppercase">
+                        <li><a href="#" class="hover:text-red transition-colors">Video Editing</a></li>
+                        <li><a href="#" class="hover:text-red transition-colors">Colour</a></li>
+                        <li><a href="#" class="hover:text-red transition-colors">Mixing</a></li>
+                        <li><a href="#" class="hover:text-red transition-colors">Mastering</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-span-12 sm:col-span-6 md:col-span-3 border-b-2 sm:border-b-0 border-r-2 md:border-r-2 border-paper/20 p-6 lg:p-10">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-paper/50 mb-4">Contact</div>
+                    <ul class="space-y-3 text-sm">
+                        <li>Sion, Mumbai — 400 022<br>India</li>
+                        <li>+91 22 2408 0955</li>
+                        <li><a href="mailto:studio@frameandfrequency.com" class="text-red hover:underline break-all">studio@frameandfrequency.com</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-span-12 sm:col-span-6 md:col-span-3 p-6 lg:p-10">
+                    <div class="font-mono text-[10px] tracking-widest uppercase text-paper/50 mb-4">Follow</div>
+                    <div class="flex gap-3">
+                        <a href="#" aria-label="LinkedIn" class="w-12 h-12 border-2 border-paper/30 flex items-center justify-center hover:bg-red hover:border-red hover:-translate-y-1 transition-all"><i class="fa-brands fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="X" class="w-12 h-12 border-2 border-paper/30 flex items-center justify-center hover:bg-red hover:border-red hover:-translate-y-1 transition-all"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="#" aria-label="YouTube" class="w-12 h-12 border-2 border-paper/30 flex items-center justify-center hover:bg-red hover:border-red hover:-translate-y-1 transition-all"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom row -->
+            <div class="grid grid-cols-12 font-mono text-[10px] tracking-widest uppercase">
+                <div class="col-span-12 md:col-span-6 p-6 lg:px-10 border-b-2 md:border-b-0 md:border-r-2 border-paper/20 text-paper/50">
+                    © <span id="year"></span> Frame &amp; Frequency Studio LLP
+                </div>
+                <div class="col-span-12 md:col-span-6 p-6 lg:px-10 text-paper/50 flex flex-wrap items-center justify-between gap-2">
+                    <span>Design — CODEGIGGAS</span>
+                    <a href="mailto:COGEGIGGAS25@GMAIL.COM" class="text-red hover:underline break-all">CODEGIGGAS25@gmail.com</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ---------- YEAR ----------
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // ---------- MOBILE MENU ----------
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const menuIcon = document.getElementById('menuIcon');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                menuIcon.classList.remove('fa-xmark');
+                menuIcon.classList.add('fa-bars');
+            } else {
+                menuIcon.classList.remove('fa-bars');
+                menuIcon.classList.add('fa-xmark');
+            }
+        });
+
+        mobileLinks.forEach(l => l.addEventListener('click', () => {
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.classList.remove('fa-xmark');
+                menuIcon.classList.add('fa-bars');
+            }
+        }));
+
+        // ---------- SCROLL REVEAL (IntersectionObserver) ----------
+        const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+            revealEls.forEach(el => io.observe(el));
+        } else {
+            revealEls.forEach(el => el.classList.add('is-visible'));
+        }
+
+        // ---------- ANIMATED COUNTERS ----------
+        const counters = document.querySelectorAll('[data-counter]');
+        const animateCounter = (el) => {
+            const target = parseInt(el.getAttribute('data-counter'), 10);
+            const suffix = el.getAttribute('data-suffix') || '';
+            const duration = 1600;
+            const start = performance.now();
+
+            const step = (now) => {
+                const progress = Math.min((now - start) / duration, 1);
+                // easeOutCubic
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const value = Math.round(target * eased);
+                el.textContent = value + suffix;
+                if (progress < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+        };
+
+        if ('IntersectionObserver' in window) {
+            const counterObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateCounter(entry.target);
+                        counterObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            counters.forEach(el => counterObserver.observe(el));
+        } else {
+            counters.forEach(el => {
+                el.textContent = el.getAttribute('data-counter') + (el.getAttribute('data-suffix') || '');
+            });
+        }
+
+        // ---------- FORM MOCK SUBMISSION ----------
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            const original = btn.innerHTML;
+            btn.innerHTML = 'SENDING... <i class="fa-solid fa-circle-notch fa-spin"></i>';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.innerHTML = 'RECEIVED — TALK SOON <i class="fa-solid fa-check"></i>';
+                btn.classList.add('bg-green-700');
+                btn.classList.remove('bg-ink');
+                this.reset();
+
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.disabled = false;
+                    btn.classList.remove('bg-green-700');
+                    btn.classList.add('bg-ink');
+                }, 3000);
+            }, 1500);
+        });
+
+        // ---------- PARALLAX ON HERO ICON (subtle) ----------
+        const heroIcon = document.querySelector('.float-pulse');
+        if (heroIcon && window.matchMedia('(min-width: 1024px)').matches) {
+            window.addEventListener('scroll', () => {
+                const y = Math.min(window.scrollY * 0.15, 60);
+                heroIcon.style.transform = `translateY(${-y}px)`;
+            }, { passive: true });
+        }
+    </script>
+</body>
+</html>
